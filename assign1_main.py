@@ -213,7 +213,6 @@ def check_overlaps(images1, images2):
     images1.flags.writeable=False
     images2.flags.writeable=False
     start = time.clock()
-    hasht = [hash(image1.tobytes()) for image1 in images1]
     hash1 = set([hash(image1.tobytes()) for image1 in images1])
     hash_raw = [hash(image2.tobytes()) for image2 in images2]
     hash2 = set(hash_raw)
@@ -295,9 +294,17 @@ test_data_nonop = flatData(test_nonoverlap)
 valid_data_nonop = flatData(valid_nonoverlap)
 
 clf = LogisticRegression() #C=1e-3, solver='liblinear', penalty='l2')
-clf.fit(train_data[1:num_of_samples, :], train_labels[1:num_of_samples])
+clf.fit(train_data, train_labels)
 
-test_prediction = clf.predict(test_data[1:num_of_samples, :])
+
 
 from sklearn.metrics import confusion_matrix
-confusion_matrix(test_labels[1:num_of_samples], test_prediction)
+test_prediction = clf.predict(test_data)
+conf = confusion_matrix(test_labels, test_prediction)
+acc = np.sum(np.diag(conf)) / np.sum(conf)
+print('Accuracy on overlapping test data is:', acc)  #0.89329999999999998
+
+test_prediction = clf.predict(test_data_nonop)
+conf = confusion_matrix(test_nonoverlap_l, test_prediction)
+acc = np.sum(np.diag(conf)) / np.sum(conf)
+print('Accuracy on non overlapping test data is:', acc) #0.883010603965
