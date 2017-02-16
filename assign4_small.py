@@ -103,7 +103,7 @@ with graph.as_default():
   valid_prediction = tf.nn.softmax(model(tf_valid_dataset))
   test_prediction = tf.nn.softmax(model(tf_test_dataset))
   
-num_steps = 101
+num_steps = 1001
 
 with tf.Session(graph=graph) as session:
   tf.global_variables_initializer().run()

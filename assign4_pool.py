@@ -49,15 +49,25 @@ def accuracy(predictions, labels):
   return (100.0 * np.sum(np.argmax(predictions, 1) == np.argmax(labels, 1))
           / predictions.shape[0])
   
-batch_size = 32
+batch_size = 16
 patch_size = 5
 depth = 16
 num_hidden = 64
 
 graph = tf.Graph()
 
-with graph.as_default():
+"""
+conv1 [16, 14, 14, 16]
+relu [16, 14, 14, 16]
+pool [16, 14, 14, 16]
+conv2 [16, 7, 7, 16]
+relu [16, 7, 7, 16]
+reshape [16, 784]
+conv3 [16, 7, 7, 16]
+final [16, 10]
+"""
 
+with graph.as_default():
 
   # Input data.
   tf_train_dataset = tf.placeholder(
@@ -82,23 +92,44 @@ with graph.as_default():
   
   # Model.
   def model(data):
-    conv = tf.nn.conv2d(data, layer1_weights, [1, 2, 2, 1], padding='SAME')
+    conv = tf.nn.conv2d(data, layer1_weights, [1, 1, 1, 1], padding='SAME')
+#    shape = conv.get_shape().as_list()
+#    print('conv1',shape)
     hidden = tf.nn.relu(conv + layer1_biases)
-    conv = tf.nn.conv2d(hidden, layer2_weights, [1, 2, 2, 1], padding='SAME')
+#    shape = hidden.get_shape().as_list()
+#    print('relu', shape)
+    hidden = tf.nn.max_pool(hidden, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
+#    shape = hidden.get_shape().as_list()
+#    print('pool',shape)
+    conv = tf.nn.conv2d(hidden, layer2_weights, [1, 1, 1, 1], padding='SAME')
+#    shape = conv.get_shape().as_list()
+#    print('conv2',shape)
     hidden = tf.nn.relu(conv + layer2_biases)
+    
+#    shape = hidden.get_shape().as_list()
+#    print('relu', shape)
+    hidden = tf.nn.max_pool(hidden, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
     shape = hidden.get_shape().as_list()
+    print('before reshape', shape)
+    
     reshape = tf.reshape(hidden, [shape[0], shape[1] * shape[2] * shape[3]])
+#    shape = reshape.get_shape().as_list()
+#    print('reshape', shape)
     hidden = tf.nn.relu(tf.matmul(reshape, layer3_weights) + layer3_biases)
+#    shape = conv.get_shape().as_list()
+#    print('conv3',shape)
     return tf.matmul(hidden, layer4_weights) + layer4_biases
   
   # Training computation.
   logits = model(tf_train_dataset)
+  shape = logits.get_shape().as_list()
+  print('final',shape)
   loss = tf.reduce_mean(
     tf.nn.softmax_cross_entropy_with_logits(labels=tf_train_labels, logits=logits))
     
   # Optimizer.
   optimizer = tf.train.GradientDescentOptimizer(0.05).minimize(loss)
-
+  
   # Predictions for the training, validation, and test data.
   train_prediction = tf.nn.softmax(logits)
   valid_prediction = tf.nn.softmax(model(tf_valid_dataset))
