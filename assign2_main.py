@@ -43,6 +43,10 @@ print('Training set', train_dataset.shape, train_labels.shape)
 print('Validation set', valid_dataset.shape, valid_labels.shape)
 print('Test set', test_dataset.shape, test_labels.shape)
 
+def accuracy(predictions, labels):
+      return (100.0 * np.sum(np.argmax(predictions, 1) == np.argmax(labels, 1))
+          / predictions.shape[0])
+
   
 """
 ###################gradient descent training###########################
@@ -91,9 +95,7 @@ with graph.as_default():
     tf.matmul(tf_valid_dataset, weights) + biases)
   test_prediction = tf.nn.softmax(tf.matmul(tf_test_dataset, weights) + biases)
   
-  def accuracy(predictions, labels):
-      return (100.0 * np.sum(np.argmax(predictions, 1) == np.argmax(labels, 1))
-          / predictions.shape[0])
+
 
 
 num_steps = 3001
@@ -256,7 +258,7 @@ with graph.as_default():
 
 
 
-num_steps = 3001
+num_steps = 6001
 
 with tf.Session(graph=graph) as session:
   tf.global_variables_initializer().run()
@@ -310,8 +312,105 @@ Test accuracy: 86.6%
   
   
 """
+
+
+###################stochastic gradient descent training (with ReLU)###########################
 Problem
 Turn the logistic regression example with SGD into a 1-hidden layer neural network with rectified linear units nn.relu()
  and 1024 hidden nodes. This model should improve your validation / test accuracy.
+"""
+batch_size = 128
+node_size = 1024
 
+graph = tf.Graph()
+with graph.as_default():
+
+  # Input data. For the training data, we use a placeholder that will be fed
+  # at run time with a training minibatch.
+  tf_train_dataset = tf.placeholder(tf.float32,
+                                    shape=(batch_size, image_size * image_size))
+  tf_train_labels = tf.placeholder(tf.float32, shape=(batch_size, num_labels))
+  tf_valid_dataset = tf.constant(valid_dataset)
+  tf_test_dataset = tf.constant(test_dataset)
+  
+  # Variables.
+  weights1 = tf.Variable(
+    tf.truncated_normal([image_size * image_size, node_size]))
+  biases1 = tf.Variable(tf.zeros([node_size]))
+  
+  weights2 = tf.Variable(
+    tf.truncated_normal([node_size, num_labels]))
+  biases2 = tf.Variable(tf.zeros([num_labels]))
+  
+  
+  def forward_pass(data):
+  # Training computation.
+      layer1 = tf.matmul(data, weights1) + biases1
+      relu = tf.nn.relu(layer1)
+      layer2 = tf.matmul(relu, weights2) + biases2
+      return layer2
+
+  logits = forward_pass(tf_train_dataset)
+  loss = tf.reduce_mean(
+    tf.nn.softmax_cross_entropy_with_logits(labels=tf_train_labels, logits=logits))
+  
+  # Optimizer.
+  optimizer = tf.train.GradientDescentOptimizer(0.5).minimize(loss)
+  
+  # Predictions for the training, validation, and test data.
+  train_prediction = tf.nn.softmax(logits)
+  valid_prediction = tf.nn.softmax(forward_pass(tf_valid_dataset))
+  test_prediction = tf.nn.softmax(forward_pass(tf_test_dataset))
+
+
+
+num_steps = 3001
+
+with tf.Session(graph=graph) as session:
+  tf.global_variables_initializer().run()
+  print("Initialized")
+  for step in range(num_steps):
+    # Pick an offset within the training data, which has been randomized.
+    # Note: we could use better randomization across epochs.
+    offset = (step * batch_size) % (train_labels.shape[0] - batch_size)
+    # Generate a minibatch.
+    batch_data = train_dataset[offset:(offset + batch_size), :]
+    batch_labels = train_labels[offset:(offset + batch_size), :]
+    # Prepare a dictionary telling the session where to feed the minibatch.
+    # The key of the dictionary is the placeholder node of the graph to be fed,
+    # and the value is the numpy array to feed to it.
+    feed_dict = {tf_train_dataset : batch_data, tf_train_labels : batch_labels}
+    _, l, predictions = session.run(
+      [optimizer, loss, train_prediction], feed_dict=feed_dict)
+    if (step % 500 == 0):
+      print("Minibatch loss at step %d: %f" % (step, l))
+      print("Minibatch accuracy: %.1f%%" % accuracy(predictions, batch_labels))
+      print("Validation accuracy: %.1f%%" % accuracy(
+        valid_prediction.eval(), valid_labels))
+  print("Test accuracy: %.1f%%" % accuracy(test_prediction.eval(), test_labels))
+  
+"""
+Initialized
+Minibatch loss at step 0: 378.296509
+Minibatch accuracy: 4.7%
+Validation accuracy: 31.2%
+Minibatch loss at step 500: 24.098688
+Minibatch accuracy: 82.0%
+Validation accuracy: 77.3%
+Minibatch loss at step 1000: 8.802997
+Minibatch accuracy: 82.0%
+Validation accuracy: 80.7%
+Minibatch loss at step 1500: 5.493356
+Minibatch accuracy: 85.2%
+Validation accuracy: 80.4%
+Minibatch loss at step 2000: 2.434342
+Minibatch accuracy: 86.7%
+Validation accuracy: 81.2%
+Minibatch loss at step 2500: 2.869197
+Minibatch accuracy: 78.9%
+Validation accuracy: 82.3%
+Minibatch loss at step 3000: 2.176812
+Minibatch accuracy: 83.6%
+Validation accuracy: 82.1%
+Test accuracy: 89.4%
 """
