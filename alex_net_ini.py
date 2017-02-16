@@ -42,19 +42,19 @@ def _variable_with_weight_decay(name, shape, stddev, wd):
 # build Alex net
 def alex_net(train_data, weights, biases, dropout):
 
-    stride = [1, 4, 4, 1]
-    conv1 = tf.nn.conv2d(train_data, weights['w_conv_1'], stride, padding = 'VALID', name = 'conv1')
-    print(conv1)
-    bias = tf.nn.bias_add(conv1, biases['b_conv_1'])
-    relu1 = tf.nn.relu(bias, name = 'relu1')
-    norm1 = tf.nn.lrn(relu1, 4, bias=1.0, alpha=0.001 / 9.0, beta=0.75, name='norm1')
-    #norm1 = tf.nn.lrn(conv1, 4, bias=2.0, alpha=0.0001, beta=0.75, name='norm1') # Alex's parameter
-    pool1 = tf.nn.max_pool(norm1, ksize=[1, 3, 3, 1], strides=[1, 2, 2, 1], padding='SAME', name='pool1')
-    print(pool1)
+#    stride = [1, 4, 4, 1]
+#    conv1 = tf.nn.conv2d(train_data, weights['w_conv_1'], stride, padding = 'VALID', name = 'conv1')
+#    print(conv1)
+#    bias = tf.nn.bias_add(conv1, biases['b_conv_1'])
+#    relu1 = tf.nn.relu(bias, name = 'relu1')
+#    norm1 = tf.nn.lrn(relu1, 4, bias=1.0, alpha=0.001 / 9.0, beta=0.75, name='norm1')
+#    #norm1 = tf.nn.lrn(conv1, 4, bias=2.0, alpha=0.0001, beta=0.75, name='norm1') # Alex's parameter
+#    pool1 = tf.nn.max_pool(norm1, ksize=[1, 3, 3, 1], strides=[1, 2, 2, 1], padding='SAME', name='pool1')
+#    print(pool1)
 
     # second layer
     stride = [1, 1, 1, 1]
-    conv2 = tf.nn.conv2d(pool1, weights['w_conv_2'], stride, padding = 'SAME', name = 'conv2')
+    conv2 = tf.nn.conv2d(train_data, weights['w_conv_2'], stride, padding = 'SAME', name = 'conv2')
     print(conv2)
     bias = tf.nn.bias_add(conv2, biases['b_conv_2'])
     relu2 = tf.nn.relu(bias, name = 'relu2')
@@ -115,7 +115,7 @@ def alex_net(train_data, weights, biases, dropout):
 ## initial Alex Net
 def para_init(n_class):
     weights = {
-        'w_conv_1':_variable_with_weight_decay('weights', shape=[11, 11, 3, 96], stddev=1e-4, wd=0.0),  #weight_decay = 0.0005
+        #'w_conv_1':_variable_with_weight_decay('weights', shape=[11, 11, 3, 96], stddev=1e-4, wd=0.0),  #weight_decay = 0.0005
         'w_conv_2':_variable_with_weight_decay('weights', shape=[5, 5, 96, 256], stddev=1e-4, wd=0.0),  #weight_decay = 0.0005
         'w_conv_3':_variable_with_weight_decay('weights', shape=[3, 3, 256, 384], stddev=1e-4, wd=0.0),  #weight_decay = 0.0005
         'w_conv_4':_variable_with_weight_decay('weights', shape=[3, 3, 384, 384], stddev=1e-4, wd=0.0),  #weight_decay = 0.0005
@@ -126,7 +126,7 @@ def para_init(n_class):
         'w_soft':_variable_with_weight_decay('weights', shape=[1000, n_class], stddev=1e-4, wd=0.0)
     }
     biases = {
-        'b_conv_1': tf.Variable(tf.random_normal([96])),
+        #'b_conv_1': tf.Variable(tf.random_normal([96])),
         'b_conv_2': tf.Variable(tf.random_normal([256])),
         'b_conv_3': tf.Variable(tf.random_normal([384])),
         'b_conv_4': tf.Variable(tf.random_normal([384])),
