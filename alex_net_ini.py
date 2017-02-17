@@ -62,19 +62,19 @@ def alex_net(train_data, weights, biases, dropout):
     print(pool2)
 
     # third layer
-    conv3 = tf.nn.conv2d(pool2, weights['w_conv_3'], stride, padding = 'SAME', name = 'conv3')
-    print(conv3)
-    bias = tf.nn.bias_add(conv3, biases['b_conv_3'])
-    relu3 = tf.nn.relu(bias, name = 'relu3')
-
-    # froth layer
-    conv4 = tf.nn.conv2d(relu3, weights['w_conv_4'], stride, padding = 'SAME', name = 'conv4')
-    print(conv4)
-    bias = tf.nn.bias_add(conv4, biases['b_conv_4'])
-    relu4 = tf.nn.relu(bias, name = 'relu4')
+#    conv3 = tf.nn.conv2d(pool2, weights['w_conv_3'], stride, padding = 'SAME', name = 'conv3')
+#    print(conv3)
+#    bias = tf.nn.bias_add(conv3, biases['b_conv_3'])
+#    relu3 = tf.nn.relu(bias, name = 'relu3')
+#
+#    # froth layer
+#    conv4 = tf.nn.conv2d(relu3, weights['w_conv_4'], stride, padding = 'SAME', name = 'conv4')
+#    print(conv4)
+#    bias = tf.nn.bias_add(conv4, biases['b_conv_4'])
+#    relu4 = tf.nn.relu(bias, name = 'relu4')
 
     # fifth layer
-    conv5 = tf.nn.conv2d(relu4, weights['w_conv_5'], stride, padding = 'SAME', name = 'conv5')
+    conv5 = tf.nn.conv2d(pool2, weights['w_conv_5'], stride, padding = 'SAME', name = 'conv5')
     print(conv5)
     bias = tf.nn.bias_add(conv5, biases['b_conv_5'])
     relu5 = tf.nn.relu(bias, name = 'relu5')
@@ -93,14 +93,14 @@ def alex_net(train_data, weights, biases, dropout):
     print(drop1)
 
     # second layer
-    full2 = tf.matmul(drop1, weights['w_full_2'])
-    print(full2)
-    relu_f2 = tf.nn.relu(full2 + biases['b_full_2'], name='fc2')
-    drop2 = tf.nn.dropout(relu_f2, dropout)
-    print(drop2)
+#    full2 = tf.matmul(drop1, weights['w_full_2'])
+#    print(full2)
+#    relu_f2 = tf.nn.relu(full2 + biases['b_full_2'], name='fc2')
+#    drop2 = tf.nn.dropout(relu_f2, dropout)
+#    print(drop2)
 
     # third layer
-    full3 = tf.matmul(drop2, weights['w_full_3'])
+    full3 = tf.matmul(drop1, weights['w_full_3'])
     print(full3)
     out = tf.nn.bias_add(full3, biases['b_full_3'])
 
@@ -115,11 +115,11 @@ def para_init(n_class):
     weights = {
         #'w_conv_1':_variable_with_weight_decay('weights', shape=[11, 11, 3, 96], stddev=1e-4, wd=0.0),  #weight_decay = 0.0005
         'w_conv_2':_variable_with_weight_decay('weights', shape=[5, 5, 1, 256], stddev=1e-4, wd=0.0),  #weight_decay = 0.0005
-        'w_conv_3':_variable_with_weight_decay('weights', shape=[3, 3, 256, 384], stddev=1e-4, wd=0.0),  #weight_decay = 0.0005
-        'w_conv_4':_variable_with_weight_decay('weights', shape=[3, 3, 384, 384], stddev=1e-4, wd=0.0),  #weight_decay = 0.0005
-        'w_conv_5':_variable_with_weight_decay('weights', shape=[3, 3, 384, 256], stddev=1e-4, wd=0.0), #weight_decay = 0.0005
+#        'w_conv_3':_variable_with_weight_decay('weights', shape=[3, 3, 256, 384], stddev=1e-4, wd=0.0),  #weight_decay = 0.0005
+#        'w_conv_4':_variable_with_weight_decay('weights', shape=[3, 3, 384, 384], stddev=1e-4, wd=0.0),  #weight_decay = 0.0005
+        'w_conv_5':_variable_with_weight_decay('weights', shape=[3, 3, 256, 256], stddev=1e-4, wd=0.0), #weight_decay = 0.0005
         'w_full_1':_variable_with_weight_decay('weights', shape=[6*6*256, 4096], stddev=1e-4, wd=0.0),  #weight_decay = 0.0005
-        'w_full_2':_variable_with_weight_decay('weights', shape=[4096, 4096], stddev=1e-4, wd=0.0),  #weight_decay = 0.0005
+#        'w_full_2':_variable_with_weight_decay('weights', shape=[4096, 4096], stddev=1e-4, wd=0.0),  #weight_decay = 0.0005
         'w_full_3':_variable_with_weight_decay('weights', shape=[4096, 1000], stddev=1e-4, wd=0.0),  #weight_decay = 0.0005
         'w_soft':_variable_with_weight_decay('weights', shape=[1000, n_class], stddev=1e-4, wd=0.0)
 #        'w_conv_2':tf.get_variable("weights1", shape=[5, 5, 1, 256],initializer=tf.contrib.layers.xavier_initializer()),  #weight_decay = 0.0005
@@ -134,11 +134,11 @@ def para_init(n_class):
     biases = {
         #'b_conv_1': tf.Variable(tf.random_normal([96])),
         'b_conv_2': tf.Variable(tf.random_normal([256])),
-        'b_conv_3': tf.Variable(tf.random_normal([384])),
-        'b_conv_4': tf.Variable(tf.random_normal([384])),
+#        'b_conv_3': tf.Variable(tf.random_normal([384])),
+#        'b_conv_4': tf.Variable(tf.random_normal([384])),
         'b_conv_5': tf.Variable(tf.random_normal([256])),
         'b_full_1': tf.Variable(tf.random_normal([4096])),
-        'b_full_2': tf.Variable(tf.random_normal([4096])),
+#        'b_full_2': tf.Variable(tf.random_normal([4096])),
         'b_full_3': tf.Variable(tf.random_normal([1000])),
         'b_soft': tf.Variable(tf.random_normal([n_class]))
     }

@@ -10,10 +10,12 @@ import numpy as np
 import tensorflow as tf
 from six.moves import cPickle as pickle
 from six.moves import range
+
+import os
+os.chdir("C:/Users/HWAG/Documents/Python Scripts/Udacity-DL/Udacity_code")
+
 import alex_net_ini as alex
 from imp import reload
-
-
 
 #cd C:\Users\HWAG\Documents\Python Scripts\Udacity-DL\Udacity_code
 pickle_file = '../assign1_notMNIST_data/notMNIST.pickle'

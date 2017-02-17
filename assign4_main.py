@@ -112,8 +112,9 @@ with graph.as_default():
   
 num_steps = 1001
 
-with tf.Session(graph=graph) as session:
+with tf.Session(graph=graph, config=tf.ConfigProto(log_device_placement=True)) as session:
   tf.global_variables_initializer().run()
+  run_metadata = tf.RunMetadata()
   print('Initialized')
   for step in range(num_steps):
     offset = (step * batch_size) % (train_labels.shape[0] - batch_size)
@@ -121,7 +122,7 @@ with tf.Session(graph=graph) as session:
     batch_labels = train_labels[offset:(offset + batch_size), :]
     feed_dict = {tf_train_dataset : batch_data, tf_train_labels : batch_labels}
     _, l, predictions = session.run(
-      [optimizer, loss, train_prediction], feed_dict=feed_dict)
+      [optimizer, loss, train_prediction], feed_dict=feed_dict, run_metadata=run_metadata)
     if (step % 50 == 0):
       print('Minibatch loss at step %d: %f' % (step, l))
       print('Minibatch accuracy: %.1f%%' % accuracy(predictions, batch_labels))
