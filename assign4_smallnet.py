@@ -14,8 +14,7 @@ from six.moves import range
 import os
 os.chdir("C:/Users/HWAG/Documents/Python Scripts/Udacity-DL/Udacity_code")
 
-#import alex_net_ini as alex
-import small_net_model as alex
+import net_model as alex
 from imp import reload
 
 #cd C:\Users\HWAG\Documents\Python Scripts\Udacity-DL\Udacity_code
@@ -84,9 +83,10 @@ with graph.as_default():
   tf_test_dataset = tf.constant(test_dataset)
   
   # Variables.
-  #weights, biases = alex.para_init(num_labels)
+  weights, biases = alex.para_init(num_labels)
   # Model
-  logits = alex.alex_net(tf_train_dataset, keep_prob)
+  from net_model import alex_net
+  logits = alex_net(tf_train_dataset, keep_prob)
   
   # Training computation.
   shape = logits.get_shape().as_list()
